@@ -4,14 +4,10 @@ import { schedule } from "@ember/runloop";
 export default apiInitializer("1.8.0", (api) => {
   api.onPageChange(() => {
     schedule("afterRender", () => {
-      // Remove existing banner
+      // ===== ANNOUNCEMENT BANNER LOGIC =====
       const existing = document.querySelector(".simple-announcement-card");
       if (existing) existing.remove();
 
-      // Get theme settings from the Discourse API
-      const siteSettings = api.container.lookup("service:site-settings");
-      
-      // Access theme settings - they're prefixed with the theme name
       const announcementEnabled = settings.announcement_enabled;
       const announcementTopicUrl = settings.announcement_topic_url;
       const announcementThumbnail = settings.announcement_thumbnail;
@@ -19,45 +15,82 @@ export default apiInitializer("1.8.0", (api) => {
       const announcementDescription = settings.announcement_description || "Click to read more";
       const showOnHomepageOnly = settings.show_on_homepage_only;
 
-      // Check if banner should show
-      if (!announcementEnabled || !announcementTopicUrl) {
-        return;
-      }
+      if (announcementEnabled && announcementTopicUrl) {
+        const currentPath = window.location.pathname;
+        const isHomepage = currentPath === "/" || currentPath.startsWith("/categories");
 
-      // Check page visibility
-      const currentPath = window.location.pathname;
-      const isHomepage = currentPath === "/" || currentPath.startsWith("/categories");
+        if (!showOnHomepageOnly || isHomepage) {
+          const thumbnailHtml = announcementThumbnail
+            ? `<img src="${announcementThumbnail}" class="announcement-thumb" alt="Announcement">`
+            : "";
 
-      if (showOnHomepageOnly && !isHomepage) {
-        return;
-      }
-
-      // Build HTML
-      const thumbnailHtml = announcementThumbnail
-        ? `<img src="${announcementThumbnail}" class="announcement-thumb" alt="Announcement">`
-        : "";
-
-      const html = `
-        <div class="simple-announcement-card">
-          <a href="${announcementTopicUrl}" class="announcement-link">
-            ${thumbnailHtml}
-            <div class="announcement-content">
-              <h3>${announcementTitle}</h3>
-              <p>${announcementDescription}</p>
-              <span class="read-more">Read more →</span>
+          const html = `
+            <div class="simple-announcement-card">
+              <a href="${announcementTopicUrl}" class="announcement-link">
+                ${thumbnailHtml}
+                <div class="announcement-content">
+                  <h3>${announcementTitle}</h3>
+                  <p>${announcementDescription}</p>
+                  <span class="read-more">Read more →</span>
+                </div>
+              </a>
             </div>
-          </a>
-        </div>
-      `;
+          `;
 
-      // Insert after welcome banner or at beginning of main content
-      const welcomeBanner = document.querySelector(".welcome-banner");
-      if (welcomeBanner) {
-        welcomeBanner.insertAdjacentHTML("afterend", html);
-      } else {
-        const mainOutlet = document.querySelector("#main-outlet");
-        if (mainOutlet) {
-          mainOutlet.insertAdjacentHTML("afterbegin", html);
+          const welcomeBanner = document.querySelector(".welcome-banner");
+          if (welcomeBanner) {
+            welcomeBanner.insertAdjacentHTML("afterend", html);
+          } else {
+            const mainOutlet = document.querySelector("#main-outlet");
+            if (mainOutlet) {
+              mainOutlet.insertAdjacentHTML("afterbegin", html);
+            }
+          }
+        }
+      }
+
+      // ===== ADD NAVIGATION TO TOPIC PAGES =====
+      const currentPath = window.location.pathname;
+      const isTopicPage = currentPath.startsWith("/t/");
+      
+      if (isTopicPage) {
+        const existingTopicNav = document.querySelector(".topic-navigation-pills");
+        if (existingTopicNav) existingTopicNav.remove();
+        
+        const topicTitle = document.querySelector("#topic-title");
+        
+        if (topicTitle) {
+          const navHtml = `
+            <nav class="topic-navigation-pills">
+              <ul class="nav-pills" style="background: rgba(255, 255, 255, 0.5); padding: 8px; border-radius: 12px; display: flex; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; list-style: none;">
+                <li style="margin: 0;">
+                  <a href="/" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Home</a>
+                </li>
+                <li style="margin: 0;">
+                  <a href="/latest" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Latest</a>
+                </li>
+                <li style="margin: 0;">
+                  <a href="/unread" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Unread</a>
+                </li>
+              </ul>
+            </nav>
+          `;
+          
+          topicTitle.insertAdjacentHTML("beforebegin", navHtml);
+          
+          // Add hover effects
+          document.querySelectorAll(".topic-navigation-pills a").forEach(link => {
+            link.addEventListener("mouseenter", (e) => {
+              e.target.style.background = "rgba(74, 158, 255, 0.1)";
+              e.target.style.color = "var(--tertiary)";
+              e.target.style.transform = "translateY(-1px)";
+            });
+            link.addEventListener("mouseleave", (e) => {
+              e.target.style.background = "transparent";
+              e.target.style.color = "var(--primary)";
+              e.target.style.transform = "translateY(0)";
+            });
+          });
         }
       }
     });
