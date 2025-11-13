@@ -69,9 +69,6 @@ export default apiInitializer("1.8.0", (api) => {
                 <li style="margin: 0;">
                   <a href="/latest" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Latest</a>
                 </li>
-                <li style="margin: 0;">
-                  <a href="/unread" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Unread</a>
-                </li>
               </ul>
             </nav>
           `;
