@@ -1,0 +1,29 @@
+announcement_enabled:
+  type: bool
+  default: true
+  description: "Enable or disable the announcement banner"
+
+announcement_thumbnail:
+  type: upload
+  default: ""
+  description: "Upload a thumbnail image for the announcement"
+
+announcement_title:
+  type: string
+  default: "Important Announcement"
+  description: "Title of the announcement"
+
+announcement_description:
+  type: string
+  default: "Click to read more about this announcement."
+  description: "Brief description text for the announcement"
+
+announcement_topic_url:
+  type: string
+  default: ""
+  description: "Full URL to the topic (e.g., https://community.membersplash.com/t/your-topic/123)"
+
+show_on_homepage_only:
+  type: bool
+  default: true
+  description: "If enabled, only shows on homepage. If disabled, shows on all pages."

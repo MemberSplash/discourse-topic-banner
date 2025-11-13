@@ -1,0 +1,44 @@
+<script type="text/discourse-plugin" version="0.8">
+  api.onPageChange(() => {
+    // Remove any existing announcement
+    const existing = document.querySelector('.simple-announcement-card');
+    if (existing) existing.remove();
+    
+    // Check if we should show the banner
+    if (!settings.announcement_enabled || !settings.announcement_topic_url) {
+      return;
+    }
+    
+    // Check page visibility settings
+    const currentPath = window.location.pathname;
+    const isHomepage = currentPath === '/' || currentPath.startsWith('/categories');
+    
+    if (settings.show_on_homepage_only && !isHomepage) {
+      return;
+    }
+    
+    // Build the announcement HTML
+    const thumbnailHtml = settings.announcement_thumbnail 
+      ? `<img src="${settings.announcement_thumbnail}" class="announcement-thumb" alt="${settings.announcement_title}">` 
+      : '';
+    
+    const html = `
+      <div class="simple-announcement-card">
+        <a href="${settings.announcement_topic_url}" class="announcement-link">
+          ${thumbnailHtml}
+          <div class="announcement-content">
+            <h3>${settings.announcement_title}</h3>
+            <p>${settings.announcement_description}</p>
+            <span class="read-more">Read more →</span>
+          </div>
+        </a>
+      </div>
+    `;
+    
+    // Insert the banner
+    const mainOutlet = document.querySelector('#main-outlet');
+    if (mainOutlet) {
+      mainOutlet.insertAdjacentHTML('afterbegin', html);
+    }
+  });
+</script>
