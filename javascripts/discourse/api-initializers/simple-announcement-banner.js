@@ -90,6 +90,13 @@ export default apiInitializer("1.8.0", (api) => {
           });
         }
       }
+      
+      // Make external links open in new tab
+      const supportLink = document.querySelector('.nav-item_custom_support a');
+      if (supportLink) {
+        supportLink.setAttribute('target', '_blank');
+        supportLink.setAttribute('rel', 'noopener noreferrer');
+      }
     });
   });
 });
