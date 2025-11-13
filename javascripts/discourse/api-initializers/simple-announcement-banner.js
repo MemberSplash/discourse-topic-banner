@@ -91,6 +91,50 @@ export default apiInitializer("1.8.0", (api) => {
         }
       }
       
+      // ===== ADD NAVIGATION TO SEARCH PAGE =====
+      const isSearchPage = currentPath.startsWith("/search");
+
+      if (isSearchPage) {
+        const existingSearchNav = document.querySelector(".search-navigation-pills");
+        if (existingSearchNav) existingSearchNav.remove();
+        
+        const searchAdvanced = document.querySelector(".search-advanced");
+        
+        if (searchAdvanced) {
+          const navHtml = `
+            <nav class="search-navigation-pills">
+              <ul class="nav-pills" style="background: rgba(255, 255, 255, 0.5); padding: 8px; border-radius: 12px; display: flex; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; list-style: none;">
+                <li style="margin: 0;">
+                  <a href="/" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Home</a>
+                </li>
+                <li style="margin: 0;">
+                  <a href="/latest" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Latest</a>
+                </li>
+                <li style="margin: 0;">
+                  <a href="https://support.membersplash.com" target="_blank" rel="noopener noreferrer" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Support</a>
+                </li>
+              </ul>
+            </nav>
+          `;
+          
+          searchAdvanced.insertAdjacentHTML("beforebegin", navHtml);
+          
+          // Add hover effects
+          document.querySelectorAll(".search-navigation-pills a").forEach(link => {
+            link.addEventListener("mouseenter", (e) => {
+              e.target.style.background = "rgba(74, 158, 255, 0.1)";
+              e.target.style.color = "var(--tertiary)";
+              e.target.style.transform = "translateY(-1px)";
+            });
+            link.addEventListener("mouseleave", (e) => {
+              e.target.style.background = "transparent";
+              e.target.style.color = "var(--primary)";
+              e.target.style.transform = "translateY(0)";
+            });
+          });
+        }
+      }
+      
       // Make external links open in new tab
       const supportLink = document.querySelector('.nav-item_custom_support a');
       if (supportLink) {
