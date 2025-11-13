@@ -135,6 +135,43 @@ export default apiInitializer("1.8.0", (api) => {
         }
       }
       
+      // At the end of the schedule("afterRender") block, add:
+
+    // ===== FIX MOBILE NAVIGATION =====
+    const isMobile = window.innerWidth <= 640;
+    const navBar = document.querySelector('#navigation-bar');
+
+    if (isMobile && navBar) {
+      // Remove the dropdown toggle button
+      const toggleButton = navBar.querySelector('.list-control-toggle-link-trigger');
+      if (toggleButton) {
+        toggleButton.closest('li').remove();
+      }
+      
+      // Add actual navigation links
+      const existingMobileNav = navBar.querySelector('.mobile-nav-items');
+      if (!existingMobileNav) {
+        const navItems = `
+          <li class="mobile-nav-items nav-item_categories" style="margin: 0;">
+            <a href="/" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Home</a>
+          </li>
+          <li class="mobile-nav-items nav-item_latest" style="margin: 0;">
+            <a href="/latest" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Latest</a>
+          </li>
+          <li class="mobile-nav-items nav-item_custom_support" style="margin: 0;">
+            <a href="https://support.membersplash.com" target="_blank" rel="noopener noreferrer" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Support</a>
+          </li>
+        `;
+        
+        navBar.insertAdjacentHTML('beforeend', navItems);
+        
+        // Make nav scrollable
+        navBar.style.overflowX = 'auto';
+        navBar.style.display = 'flex';
+        navBar.style.flexWrap = 'nowrap';
+      }
+    }
+      
       // Make external links open in new tab
       const supportLink = document.querySelector('.nav-item_custom_support a');
       if (supportLink) {
