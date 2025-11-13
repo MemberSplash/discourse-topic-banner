@@ -4,22 +4,13 @@ api.onPageChange(() => {
   const existing = document.querySelector('.simple-announcement-card');
   if (existing) existing.remove();
   
-  // Access settings from the global settings object
-  const themeSettings = window.Discourse?.SiteSettings || settings;
-  
-  // Get our component settings
+  // Get settings
   const announcementEnabled = settings.announcement_enabled;
   const announcementTopicUrl = settings.announcement_topic_url;
   const announcementThumbnail = settings.announcement_thumbnail;
   const announcementTitle = settings.announcement_title || 'Announcement';
   const announcementDescription = settings.announcement_description || 'Click to read more';
   const showOnHomepageOnly = settings.show_on_homepage_only;
-  
-  console.log('Banner settings:', {
-    enabled: announcementEnabled,
-    url: announcementTopicUrl,
-    title: announcementTitle
-  });
   
   // Check if banner should show
   if (!announcementEnabled || !announcementTopicUrl) {
@@ -52,13 +43,23 @@ api.onPageChange(() => {
     </div>
   `;
   
-  // Wait for DOM to be ready and insert banner
+  // Wait for DOM and insert after welcome banner
   setTimeout(() => {
-    const mainOutlet = document.querySelector('#main-outlet');
-    if (mainOutlet && !document.querySelector('.simple-announcement-card')) {
-      mainOutlet.insertAdjacentHTML('afterbegin', html);
-      console.log('Banner inserted!');
+    if (document.querySelector('.simple-announcement-card')) return;
+    
+    // Try to insert after welcome banner
+    const welcomeBanner = document.querySelector('.welcome-banner');
+    if (welcomeBanner) {
+      welcomeBanner.insertAdjacentHTML('afterend', html);
+      console.log('Banner inserted after welcome banner');
+    } else {
+      // Fallback: insert at beginning of main content
+      const mainOutlet = document.querySelector('#main-outlet');
+      if (mainOutlet) {
+        mainOutlet.insertAdjacentHTML('afterbegin', html);
+        console.log('Banner inserted at main outlet');
+      }
     }
-  }, 100);
+  }, 150);
 });
 </script>
