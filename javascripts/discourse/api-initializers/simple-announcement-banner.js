@@ -98,9 +98,9 @@ export default apiInitializer("1.8.0", (api) => {
         const existingSearchNav = document.querySelector(".search-navigation-pills");
         if (existingSearchNav) existingSearchNav.remove();
         
-        const searchAdvanced = document.querySelector(".search-advanced");
+        const searchContainer = document.querySelector(".search-container") || document.querySelector(".search-header");
         
-        if (searchAdvanced) {
+        if (searchContainer) {
           const navHtml = `
             <nav class="search-navigation-pills">
               <ul class="nav-pills" style="background: rgba(255, 255, 255, 0.5); padding: 8px; border-radius: 12px; display: flex; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; list-style: none;">
@@ -117,7 +117,7 @@ export default apiInitializer("1.8.0", (api) => {
             </nav>
           `;
           
-          searchAdvanced.insertAdjacentHTML("beforebegin", navHtml);
+          searchContainer.insertAdjacentHTML("beforebegin", navHtml);
           
           // Add hover effects
           document.querySelectorAll(".search-navigation-pills a").forEach(link => {
