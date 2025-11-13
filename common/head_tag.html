@@ -1,0 +1,64 @@
+<script type="text/discourse-plugin" version="1.0">
+api.onPageChange(() => {
+  // Remove existing banner
+  const existing = document.querySelector('.simple-announcement-card');
+  if (existing) existing.remove();
+  
+  // Access settings from the global settings object
+  const themeSettings = window.Discourse?.SiteSettings || settings;
+  
+  // Get our component settings
+  const announcementEnabled = settings.announcement_enabled;
+  const announcementTopicUrl = settings.announcement_topic_url;
+  const announcementThumbnail = settings.announcement_thumbnail;
+  const announcementTitle = settings.announcement_title || 'Announcement';
+  const announcementDescription = settings.announcement_description || 'Click to read more';
+  const showOnHomepageOnly = settings.show_on_homepage_only;
+  
+  console.log('Banner settings:', {
+    enabled: announcementEnabled,
+    url: announcementTopicUrl,
+    title: announcementTitle
+  });
+  
+  // Check if banner should show
+  if (!announcementEnabled || !announcementTopicUrl) {
+    return;
+  }
+  
+  // Check page visibility
+  const currentPath = window.location.pathname;
+  const isHomepage = currentPath === '/' || currentPath.startsWith('/categories');
+  
+  if (showOnHomepageOnly && !isHomepage) {
+    return;
+  }
+  
+  // Build HTML
+  const thumbnailHtml = announcementThumbnail 
+    ? `<img src="${announcementThumbnail}" class="announcement-thumb" alt="Announcement">` 
+    : '';
+  
+  const html = `
+    <div class="simple-announcement-card">
+      <a href="${announcementTopicUrl}" class="announcement-link">
+        ${thumbnailHtml}
+        <div class="announcement-content">
+          <h3>${announcementTitle}</h3>
+          <p>${announcementDescription}</p>
+          <span class="read-more">Read more →</span>
+        </div>
+      </a>
+    </div>
+  `;
+  
+  // Wait for DOM to be ready and insert banner
+  setTimeout(() => {
+    const mainOutlet = document.querySelector('#main-outlet');
+    if (mainOutlet && !document.querySelector('.simple-announcement-card')) {
+      mainOutlet.insertAdjacentHTML('afterbegin', html);
+      console.log('Banner inserted!');
+    }
+  }, 100);
+});
+</script>
