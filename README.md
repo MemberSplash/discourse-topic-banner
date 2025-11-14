@@ -1,6 +1,7 @@
-# Simple Announcement Banner for Discourse
+# Member Splash Custom Discourse Components
 
-A lightweight Discourse theme component that displays a customizable announcement banner with thumbnail, title, description, and link.
+* Adds a customizable announcement banner with thumbnail, title, description, and link.
+* Creates navigation menus for all pages with links to home, latest and support plus breadcrumbs when viewing a single topic
 
 ## Features
 
