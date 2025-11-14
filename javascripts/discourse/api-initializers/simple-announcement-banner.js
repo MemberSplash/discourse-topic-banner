@@ -49,19 +49,19 @@ export default apiInitializer("1.8.0", (api) => {
         }
       }
 
-      // ===== BREADCRUMB NAVIGATION =====
-      const existingBreadcrumbs = document.querySelector(".custom-breadcrumbs");
-      if (existingBreadcrumbs) existingBreadcrumbs.remove();
+      // ===== UNIFIED BREADCRUMB + NAVIGATION BAR =====
+      const existingUnifiedNav = document.querySelector(".unified-navigation");
+      if (existingUnifiedNav) existingUnifiedNav.remove();
 
       const currentPath = window.location.pathname;
       const isTopicPage = currentPath.startsWith("/t/");
       const isCategoryPage = currentPath.startsWith("/c/");
       
-      // Only show breadcrumbs on topic and category pages
+      // Show unified nav on topic and category pages
       if (isTopicPage || isCategoryPage) {
-        let breadcrumbHtml = `
-          <nav class="custom-breadcrumbs" style="background: rgba(255, 255, 255, 0.5); padding: 10px 16px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; flex-wrap: wrap; font-size: 14px;">
-            <a href="/" class="breadcrumb-item" style="color: var(--primary-high); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">🏠 Home</a>
+        let navHtml = `
+          <nav class="unified-navigation" style="background: rgba(255, 255, 255, 0.5); padding: 10px 16px; border-radius: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; flex-wrap: wrap; font-size: 14px;">
+            <a href="/" class="nav-item" style="color: var(--primary-high); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">🏠 Home</a>
         `;
         
         // Try to find category information
@@ -71,9 +71,9 @@ export default apiInitializer("1.8.0", (api) => {
         if (categoryLink && categoryTitle) {
           const categoryHref = categoryLink.getAttribute('href');
           const categoryName = categoryTitle.textContent.trim();
-          breadcrumbHtml += `
-            <span class="breadcrumb-separator" style="color: var(--primary-medium); user-select: none;">›</span>
-            <a href="${categoryHref}" class="breadcrumb-item" style="color: var(--primary-high); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">${categoryName}</a>
+          navHtml += `
+            <span style="color: var(--primary-medium); user-select: none;">›</span>
+            <a href="${categoryHref}" class="nav-item" style="color: var(--primary-high); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">${categoryName}</a>
           `;
         }
         
@@ -83,69 +83,47 @@ export default apiInitializer("1.8.0", (api) => {
           if (topicTitle) {
             const titleText = topicTitle.textContent.trim();
             // Truncate if too long
-            const displayTitle = titleText.length > 50 ? titleText.substring(0, 50) + '...' : titleText;
-            breadcrumbHtml += `
-              <span class="breadcrumb-separator" style="color: var(--primary-medium); user-select: none;">›</span>
-              <span class="breadcrumb-item current" style="color: var(--primary); font-weight: 600;">${displayTitle}</span>
+            const displayTitle = titleText.length > 40 ? titleText.substring(0, 40) + '...' : titleText;
+            navHtml += `
+              <span style="color: var(--primary-medium); user-select: none;">›</span>
+              <span class="nav-item current" style="color: var(--primary); font-weight: 600;">${displayTitle}</span>
             `;
           }
         }
         
-        breadcrumbHtml += '</nav>';
+        // Add separator before main nav links
+        navHtml += `
+          <span style="color: var(--primary-medium); margin: 0 8px; user-select: none;">|</span>
+          <a href="/latest" class="nav-item nav-link" style="color: var(--primary); text-decoration: none; font-weight: 500; transition: all 0.2s ease; padding: 6px 12px; border-radius: 8px;">Latest</a>
+          <a href="https://support.membersplash.com" target="_blank" rel="noopener noreferrer" class="nav-item nav-link" style="color: var(--primary); text-decoration: none; font-weight: 500; transition: all 0.2s ease; padding: 6px 12px; border-radius: 8px;">Support</a>
+        `;
         
-        // Insert breadcrumbs
+        navHtml += '</nav>';
+        
+        // Insert unified navigation
         const mainOutlet = document.querySelector("#main-outlet");
         if (mainOutlet) {
-          mainOutlet.insertAdjacentHTML("afterbegin", breadcrumbHtml);
+          mainOutlet.insertAdjacentHTML("afterbegin", navHtml);
           
-          // Add hover effects to breadcrumb links
-          document.querySelectorAll(".custom-breadcrumbs .breadcrumb-item:not(.current)").forEach(link => {
+          // Add hover effects to breadcrumb items
+          document.querySelectorAll(".unified-navigation .nav-item:not(.current):not(.nav-link)").forEach(link => {
             link.addEventListener("mouseenter", (e) => {
               e.target.style.color = "var(--tertiary)";
-              e.target.style.transform = "translateY(-1px)";
             });
             link.addEventListener("mouseleave", (e) => {
               e.target.style.color = "var(--primary-high)";
-              e.target.style.transform = "translateY(0)";
             });
           });
-        }
-      }
-
-      // ===== ADD NAVIGATION TO TOPIC PAGES =====
-      if (isTopicPage) {
-        const existingTopicNav = document.querySelector(".topic-navigation-pills");
-        if (existingTopicNav) existingTopicNav.remove();
-        
-        const topicTitle = document.querySelector("#topic-title");
-        
-        if (topicTitle) {
-          const navHtml = `
-            <nav class="topic-navigation-pills">
-              <ul class="nav-pills" style="background: rgba(255, 255, 255, 0.5); padding: 8px; border-radius: 12px; display: flex; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; list-style: none;">
-                <li style="margin: 0;">
-                  <a href="/" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Home</a>
-                </li>
-                <li style="margin: 0;">
-                  <a href="/latest" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: all 0.2s ease; border: none; background: transparent; text-decoration: none; display: block; color: var(--primary);">Latest</a>
-                </li>
-              </ul>
-            </nav>
-          `;
           
-          topicTitle.insertAdjacentHTML("beforebegin", navHtml);
-          
-          // Add hover effects
-          document.querySelectorAll(".topic-navigation-pills a").forEach(link => {
+          // Add hover effects to navigation links
+          document.querySelectorAll(".unified-navigation .nav-link").forEach(link => {
             link.addEventListener("mouseenter", (e) => {
               e.target.style.background = "rgba(74, 158, 255, 0.1)";
               e.target.style.color = "var(--tertiary)";
-              e.target.style.transform = "translateY(-1px)";
             });
             link.addEventListener("mouseleave", (e) => {
               e.target.style.background = "transparent";
               e.target.style.color = "var(--primary)";
-              e.target.style.transform = "translateY(0)";
             });
           });
         }
