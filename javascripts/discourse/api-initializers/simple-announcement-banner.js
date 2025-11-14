@@ -49,10 +49,70 @@ export default apiInitializer("1.8.0", (api) => {
         }
       }
 
-      // ===== ADD NAVIGATION TO TOPIC PAGES =====
+      // ===== BREADCRUMB NAVIGATION =====
+      const existingBreadcrumbs = document.querySelector(".custom-breadcrumbs");
+      if (existingBreadcrumbs) existingBreadcrumbs.remove();
+
       const currentPath = window.location.pathname;
       const isTopicPage = currentPath.startsWith("/t/");
+      const isCategoryPage = currentPath.startsWith("/c/");
       
+      // Only show breadcrumbs on topic and category pages
+      if (isTopicPage || isCategoryPage) {
+        let breadcrumbHtml = `
+          <nav class="custom-breadcrumbs" style="background: rgba(255, 255, 255, 0.5); padding: 10px 16px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 20px; flex-wrap: wrap; font-size: 14px;">
+            <a href="/" class="breadcrumb-item" style="color: var(--primary-high); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">🏠 Home</a>
+        `;
+        
+        // Try to find category information
+        const categoryLink = document.querySelector('.category-link, a[href*="/c/"]');
+        const categoryTitle = document.querySelector('.category-title-header h1, .category-name');
+        
+        if (categoryLink && categoryTitle) {
+          const categoryHref = categoryLink.getAttribute('href');
+          const categoryName = categoryTitle.textContent.trim();
+          breadcrumbHtml += `
+            <span class="breadcrumb-separator" style="color: var(--primary-medium); user-select: none;">›</span>
+            <a href="${categoryHref}" class="breadcrumb-item" style="color: var(--primary-high); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">${categoryName}</a>
+          `;
+        }
+        
+        // If we're on a topic page, add the topic title
+        if (isTopicPage) {
+          const topicTitle = document.querySelector('.fancy-title');
+          if (topicTitle) {
+            const titleText = topicTitle.textContent.trim();
+            // Truncate if too long
+            const displayTitle = titleText.length > 50 ? titleText.substring(0, 50) + '...' : titleText;
+            breadcrumbHtml += `
+              <span class="breadcrumb-separator" style="color: var(--primary-medium); user-select: none;">›</span>
+              <span class="breadcrumb-item current" style="color: var(--primary); font-weight: 600;">${displayTitle}</span>
+            `;
+          }
+        }
+        
+        breadcrumbHtml += '</nav>';
+        
+        // Insert breadcrumbs
+        const mainOutlet = document.querySelector("#main-outlet");
+        if (mainOutlet) {
+          mainOutlet.insertAdjacentHTML("afterbegin", breadcrumbHtml);
+          
+          // Add hover effects to breadcrumb links
+          document.querySelectorAll(".custom-breadcrumbs .breadcrumb-item:not(.current)").forEach(link => {
+            link.addEventListener("mouseenter", (e) => {
+              e.target.style.color = "var(--tertiary)";
+              e.target.style.transform = "translateY(-1px)";
+            });
+            link.addEventListener("mouseleave", (e) => {
+              e.target.style.color = "var(--primary-high)";
+              e.target.style.transform = "translateY(0)";
+            });
+          });
+        }
+      }
+
+      // ===== ADD NAVIGATION TO TOPIC PAGES =====
       if (isTopicPage) {
         const existingTopicNav = document.querySelector(".topic-navigation-pills");
         if (existingTopicNav) existingTopicNav.remove();
@@ -135,42 +195,40 @@ export default apiInitializer("1.8.0", (api) => {
         }
       }
       
-      // At the end of the schedule("afterRender") block, add:
+      // ===== FIX MOBILE NAVIGATION =====
+      const isMobile = window.innerWidth <= 640;
+      const navBar = document.querySelector('#navigation-bar');
 
-    // ===== FIX MOBILE NAVIGATION =====
-    const isMobile = window.innerWidth <= 640;
-    const navBar = document.querySelector('#navigation-bar');
-
-    if (isMobile && navBar) {
-      // Remove the dropdown toggle button
-      const toggleButton = navBar.querySelector('.list-control-toggle-link-trigger');
-      if (toggleButton) {
-        toggleButton.closest('li').remove();
-      }
-      
-      // Add actual navigation links
-      const existingMobileNav = navBar.querySelector('.mobile-nav-items');
-      if (!existingMobileNav) {
-        const navItems = `
-          <li class="mobile-nav-items nav-item_categories" style="margin: 0;">
-            <a href="/" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Home</a>
-          </li>
-          <li class="mobile-nav-items nav-item_latest" style="margin: 0;">
-            <a href="/latest" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Latest</a>
-          </li>
-          <li class="mobile-nav-items nav-item_custom_support" style="margin: 0;">
-            <a href="https://support.membersplash.com" target="_blank" rel="noopener noreferrer" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Support</a>
-          </li>
-        `;
+      if (isMobile && navBar) {
+        // Remove the dropdown toggle button
+        const toggleButton = navBar.querySelector('.list-control-toggle-link-trigger');
+        if (toggleButton) {
+          toggleButton.closest('li').remove();
+        }
         
-        navBar.insertAdjacentHTML('beforeend', navItems);
-        
-        // Make nav scrollable
-        navBar.style.overflowX = 'auto';
-        navBar.style.display = 'flex';
-        navBar.style.flexWrap = 'nowrap';
+        // Add actual navigation links
+        const existingMobileNav = navBar.querySelector('.mobile-nav-items');
+        if (!existingMobileNav) {
+          const navItems = `
+            <li class="mobile-nav-items nav-item_categories" style="margin: 0;">
+              <a href="/" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Home</a>
+            </li>
+            <li class="mobile-nav-items nav-item_latest" style="margin: 0;">
+              <a href="/latest" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Latest</a>
+            </li>
+            <li class="mobile-nav-items nav-item_custom_support" style="margin: 0;">
+              <a href="https://support.membersplash.com" target="_blank" rel="noopener noreferrer" style="padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 14px; display: block; color: var(--primary); text-decoration: none; white-space: nowrap;">Support</a>
+            </li>
+          `;
+          
+          navBar.insertAdjacentHTML('beforeend', navItems);
+          
+          // Make nav scrollable
+          navBar.style.overflowX = 'auto';
+          navBar.style.display = 'flex';
+          navBar.style.flexWrap = 'nowrap';
+        }
       }
-    }
       
       // Make external links open in new tab
       const supportLink = document.querySelector('.nav-item_custom_support a');
